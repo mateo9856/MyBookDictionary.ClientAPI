@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyBookDictionary.Application\MyBookDictionary.Application.csproj" />
-    <ProjectReference Include="..\MyBookDictionary.ClientAPI\MyBookDictionary.ClientAPI.csproj" />
     <ProjectReference Include="..\MyBookDictionary.Model\MyBookDictionary.Model.csproj" />
   </ItemGroup>
 

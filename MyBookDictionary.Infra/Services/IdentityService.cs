@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.Extensions.Options;
-using MyBookDictionary.ClientAPI.Options;
+using MyBookDictionary.Infra.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -70,7 +70,8 @@ namespace MyBookDictionary.Infra.Services
                         new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                         new Claim("UserId", GetUser.Id.ToString()),
-                        new Claim("Email", user.Email)
+                        new Claim("Email", user.Email),
+                        new Claim("Role", GetUser.UserType.ToString())
                     };
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));

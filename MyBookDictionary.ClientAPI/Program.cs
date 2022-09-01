@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using MyBookDictionary.ClientAPI.Options;
+using MyBookDictionary.Infra.Options;
 using System.Text;
 
 namespace MyBookDictionary.ClientAPI

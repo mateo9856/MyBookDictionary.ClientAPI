@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyBookDictionary.ClientAPI.Options
+namespace MyBookDictionary.Infra.Options
 {
     public class JwtOptions
     {
