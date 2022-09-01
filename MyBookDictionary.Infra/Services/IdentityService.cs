@@ -9,16 +9,24 @@ using System.Text;
 using System.Threading.Tasks;
 using MyBookDictionary.Infra.Helpers;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.Extensions.Options;
+using MyBookDictionary.ClientAPI.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace MyBookDictionary.Infra.Services
 {
     public class IdentityService : IIdentityService
     {
         private readonly IdentityContext _context;
+        private JwtOptions _options { get; }
 
-        public IdentityService(IdentityContext context)
+        public IdentityService(IdentityContext context, IOptions<JwtOptions> options)
         {
             _context = context;
+            _options = options.Value;
         }
 
         public async Task<bool> CreateUser(CreateUser user)
@@ -51,9 +59,35 @@ namespace MyBookDictionary.Infra.Services
             return await _context.Users.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public Task<bool> LoginUser(LoginUser user)
+        public async Task<object> LoginUser(LoginUser user)
         {
-            throw new NotImplementedException();
+            var GetUser = await _context.Users.FirstOrDefaultAsync(d => d.Email == user.Email);
+
+            if(GetUser != null)
+            {
+                var claims = new[] {
+                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, _options.Subject),
+                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                        new Claim("UserId", GetUser.Id.ToString()),
+                        new Claim("Email", user.Email)
+                    };
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
+                var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(
+                    _options.Issuer,
+                    _options.Audience,
+                    claims,
+                    expires: DateTime.UtcNow.AddMinutes(10),
+                    signingCredentials: signIn);
+            }
+
+            return new
+            {
+                Status = "Failed",
+                Error = "User doesn't exist!"
+            };
         }
 
         public Task<bool> RequestMFA()

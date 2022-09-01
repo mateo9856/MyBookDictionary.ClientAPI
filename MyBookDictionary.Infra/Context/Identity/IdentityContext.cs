@@ -11,20 +11,25 @@ namespace MyBookDictionary.Infra.Context.Identity
 {
     public class IdentityContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-        public IdentityContext(IConfiguration configuration)
+        public IdentityContext(DbContextOptions<IdentityContext> options) : base(options)
         {
-            _configuration = configuration;
         }
 
         public DbSet<AccountUser> Users { get; set; }
 
         public DbSet<UserRole> UsersRoles { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            optionsBuilder.UseSqlServer(_configuration.GetConnectionString("BookClient"));
-            base.OnConfiguring(optionsBuilder);
+            foreach (var entry in ChangeTracker.Entries<AccountUser>())
+            {
+                if (entry.State == EntityState.Deleted)
+                {
+                    entry.Entity.DeleteDate = DateTime.Now;
+                }
+            }
+
+            return base.SaveChangesAsync(cancellationToken);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
