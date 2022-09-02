@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyBookDictionary.Application.Requests.Identity;
 using MyBookDictionary.Infra.Interfaces;
+using System.Web.Helpers;
+using System.Web.WebPages;
 
 namespace MyBookDictionary.ClientAPI.Controllers
 {
@@ -10,28 +13,53 @@ namespace MyBookDictionary.ClientAPI.Controllers
     public class IdentityController : ControllerBase
     {
         private readonly IIdentityService _identity;
+        private readonly IValidator<LoginUser> _validatorLogin;
+        private readonly IValidator<CreateUser> _validaatorRegister;
 
-        public IdentityController(IIdentityService identity)
+        public IdentityController(IIdentityService identity, IValidator<LoginUser> validatorLogin, IValidator<CreateUser> validatorRegister)
         {
             _identity = identity;
+            _validatorLogin = validatorLogin;
+            _validaatorRegister = validatorRegister;
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Login([FromBody]LoginUser user)
         {
-            //find user and return important value
+            var ValidLogin = _validatorLogin.Validate(user);
 
-            //if user used mfa request to mfa
+            if(ValidLogin.IsValid)
+            {
+                var GetUser = await _identity.LoginUser(user);
 
-            return Ok();
+                //add method to check if val ismfa
+
+                return GetUser.Item1 == "Failed" ? BadRequest() :
+                    GetUser.Item2 == "Success" ? Ok(new { Status = GetUser.Item1, Token = GetUser.Item2 }) : Forbid();
+            }
+
+            return BadRequest(ValidLogin.Errors);
+
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] CreateUser user)
         {
             //register but before validate
+            var ValidRegister = _validaatorRegister.Validate(user);
 
-            //send confirm email
+            if(ValidRegister.IsValid)
+            {
+                //send confirm email
+                var UserCreate = await _identity.CreateUser(user);
+                if (UserCreate) _identity.SendCheckEmail(user.Email); //end method in service
+                
+            }
 
             return Ok();
         }

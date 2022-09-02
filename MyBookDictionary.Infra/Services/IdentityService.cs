@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using MyBookDictionary.Infra.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Mail;
 
 namespace MyBookDictionary.Infra.Services
 {
@@ -33,11 +34,14 @@ namespace MyBookDictionary.Infra.Services
         {
             var NewUser = new AccountUser
             {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Id = Guid.NewGuid(),
                 Password = CryptoHelper.EncodeToMD5(user.Password),
                 DateOfBirth = DateTime.Now,
                 Email = user.Email,
-                UserType = UserType.Client
+                UserType = UserType.Client,
+                IsUsedMFA = user.UsedMFA
             };
 
             var NewRole = new UserRole
@@ -59,11 +63,11 @@ namespace MyBookDictionary.Infra.Services
             return await _context.Users.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<object> LoginUser(LoginUser user)
+        public async Task<(string, string)> LoginUser(LoginUser user)
         {
             var GetUser = await _context.Users.FirstOrDefaultAsync(d => d.Email == user.Email);
 
-            if(GetUser != null)
+            if (GetUser != null)
             {
                 var claims = new[] {
                         new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, _options.Subject),
@@ -82,18 +86,44 @@ namespace MyBookDictionary.Infra.Services
                     claims,
                     expires: DateTime.UtcNow.AddMinutes(10),
                     signingCredentials: signIn);
-            }
 
-            return new
+                return ("Succeed", token.ToString());
+            }
+            else if (GetUser != null && GetUser.IsUsedMFA)
             {
-                Status = "Failed",
-                Error = "User doesn't exist!"
-            };
+                //mfa request
+            }
+            return ("Failed", "User not exist!");
         }
 
         public Task<bool> RequestMFA()
         {
             throw new NotImplementedException();
+        }
+
+        public void SendCheckEmail(string email)
+        {
+            var from = "confirmation@bookdict.com";
+
+            var message = new MailMessage(from, email);
+            message.Subject = "Confirm your Email.";
+            message.Body = "Hello.\n" +
+                "Thank for a registering to Book Dictionary. Click below link to confirm register!\n" +
+                "http://localhost:9412/api/confirm/653gdgerer";
+
+            SmtpClient smtpClient = new SmtpClient(email);
+
+            smtpClient.UseDefaultCredentials = true;
+            
+            try
+            {
+                smtpClient.Send(message);
+
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());//implement logger
+            }
+
         }
     }
 }
