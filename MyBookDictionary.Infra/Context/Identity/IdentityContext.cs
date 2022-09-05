@@ -34,6 +34,11 @@ namespace MyBookDictionary.Infra.Context.Identity
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("identity");
+
+            modelBuilder.Entity<UserRole>()
+                .HasNoKey();
+
             base.OnModelCreating(modelBuilder);
         }
     }

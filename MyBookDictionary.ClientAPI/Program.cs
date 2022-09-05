@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MyBookDictionary.Application;
+using MyBookDictionary.Infra;
 using MyBookDictionary.Infra.Options;
 using System.Text;
 
@@ -16,6 +18,10 @@ namespace MyBookDictionary.ClientAPI
             // Services and extensions
 
             services.AddControllers();
+
+            services.AddInfrastructureServices();
+
+            services.AddApplicationDependencies();
 
             //JWT
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
