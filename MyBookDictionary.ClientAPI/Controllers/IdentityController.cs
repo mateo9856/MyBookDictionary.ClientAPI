@@ -1,10 +1,7 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyBookDictionary.Application.Requests.Identity;
 using MyBookDictionary.Infra.Interfaces;
-using System.Web.Helpers;
-using System.Web.WebPages;
 
 namespace MyBookDictionary.ClientAPI.Controllers
 {
@@ -23,7 +20,7 @@ namespace MyBookDictionary.ClientAPI.Controllers
             _validaatorRegister = validatorRegister;
         }
 
-        [HttpPost]
+        [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -45,7 +42,7 @@ namespace MyBookDictionary.ClientAPI.Controllers
 
         }
 
-        [HttpPost]
+        [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] CreateUser user)

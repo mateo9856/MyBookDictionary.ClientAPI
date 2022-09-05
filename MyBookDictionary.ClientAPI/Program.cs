@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using MyBookDictionary.Application;
 using MyBookDictionary.Infra;
 using MyBookDictionary.Infra.Options;
@@ -16,8 +17,6 @@ namespace MyBookDictionary.ClientAPI
             var config = builder.Configuration;
 
             // Services and extensions
-
-            services.AddControllers();
 
             services.AddInfrastructureServices();
 
@@ -43,8 +42,11 @@ namespace MyBookDictionary.ClientAPI
 
             //OpenAPI
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
-
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            });
+            services.AddControllers();
 
             //App Configuration
 
@@ -54,7 +56,10 @@ namespace MyBookDictionary.ClientAPI
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "BookDictionaryAPI");
+                });
             }
 
             app.UseHttpsRedirection();
