@@ -34,7 +34,7 @@ namespace MyBookDictionary.ClientAPI
                         ValidateAudience = true,
                         ValidAudience = config["Jwt:Audience"],
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Key"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]))
                     };
                 });
 

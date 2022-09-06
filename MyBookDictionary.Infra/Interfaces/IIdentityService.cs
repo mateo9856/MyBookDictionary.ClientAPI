@@ -12,7 +12,7 @@ namespace MyBookDictionary.Infra.Interfaces
     {
         Task<bool> CreateUser(CreateUser user);
         Task<AccountUser> GetById(Guid id);
-        Task<(string, string)> LoginUser(LoginUser user);
+        Task<(string, object)> LoginUser(LoginUser user);
         Task<bool> RequestMFA();
         void SendCheckEmail(string email);
     }

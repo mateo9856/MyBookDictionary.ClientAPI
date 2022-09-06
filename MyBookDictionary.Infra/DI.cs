@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using MyBookDictionary.Infra.Context.Identity;
 using MyBookDictionary.Infra.Context.Main;
+using MyBookDictionary.Infra.Interfaces;
+using MyBookDictionary.Infra.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +18,8 @@ namespace MyBookDictionary.Infra
         {
             services.AddDbContext<IdentityContext>(opt => opt.UseSqlServer("Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=BookDict;Integrated Security=True;"));
             services.AddDbContext<MainContext>(opt => opt.UseSqlServer("Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=BookDict;Integrated Security=True;"));
+
+            services.AddScoped<IIdentityService, IdentityService>();
 
             return services;
         }

@@ -46,6 +46,7 @@ namespace MyBookDictionary.Infra.Services
 
             var NewRole = new UserRole
             {
+                RoleId = Guid.NewGuid(),
                 RoleName = "Client",
                 User = NewUser
             };
@@ -63,9 +64,9 @@ namespace MyBookDictionary.Infra.Services
             return await _context.Users.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        public async Task<(string, string)> LoginUser(LoginUser user)
+        public async Task<(string, object)> LoginUser(LoginUser user)
         {
-            var GetUser = await _context.Users.FirstOrDefaultAsync(d => d.Email == user.Email);
+            var GetUser = await _context.Users.FirstOrDefaultAsync(d => d.Email == user.Email && d.Password == CryptoHelper.EncodeToMD5(user.Password));
 
             if (GetUser != null)
             {
@@ -84,10 +85,10 @@ namespace MyBookDictionary.Infra.Services
                     _options.Issuer,
                     _options.Audience,
                     claims,
-                    expires: DateTime.UtcNow.AddMinutes(10),
+                    expires: DateTime.UtcNow.AddHours(10),
                     signingCredentials: signIn);
 
-                return ("Succeed", token.ToString());
+                return ("Success", new JwtSecurityTokenHandler().WriteToken(token));
             }
             else if (GetUser != null && GetUser.IsUsedMFA)
             {

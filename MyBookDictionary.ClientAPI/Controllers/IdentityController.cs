@@ -35,7 +35,7 @@ namespace MyBookDictionary.ClientAPI.Controllers
                 //add method to check if val ismfa
 
                 return GetUser.Item1 == "Failed" ? BadRequest() :
-                    GetUser.Item2 == "Success" ? Ok(new { Status = GetUser.Item1, Token = GetUser.Item2 }) : Forbid();
+                    GetUser.Item1 == "Success" ? Ok(new { Status = GetUser.Item1, Token = GetUser.Item2 }) : Forbid();
             }
 
             return BadRequest(ValidLogin.Errors);

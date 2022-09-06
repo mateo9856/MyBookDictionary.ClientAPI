@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyBookDictionary.Infra.Context.Identity;
 
@@ -11,9 +12,10 @@ using MyBookDictionary.Infra.Context.Identity;
 namespace MyBookDictionary.Infra.Migrations.Identity
 {
     [DbContext(typeof(IdentityContext))]
-    partial class IdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20220906190828_UpdateIdentity")]
+    partial class UpdateIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,8 +66,7 @@ namespace MyBookDictionary.Infra.Migrations.Identity
 
             modelBuilder.Entity("MyBookDictionary.Model.User.UserRole", b =>
                 {
-                    b.Property<Guid>("RoleId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("Guid")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("RoleName")
@@ -74,8 +75,6 @@ namespace MyBookDictionary.Infra.Migrations.Identity
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("RoleId");
 
                     b.HasIndex("UserId");
 

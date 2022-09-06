@@ -9,6 +9,7 @@ namespace MyBookDictionary.Model.User
 {
     public class UserRole
     {
+        public Guid RoleId { get; set; }
         public string RoleName { get; set; }
         [ForeignKey("User")]
         public Guid UserId { get; set; }
