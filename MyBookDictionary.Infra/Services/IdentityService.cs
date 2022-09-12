@@ -51,11 +51,21 @@ namespace MyBookDictionary.Infra.Services
                 User = NewUser
             };
 
+
+
             await _context.Users.AddAsync(NewUser);
             await _context.UsersRoles.AddAsync(NewRole);
-            int save = await _context.SaveChangesAsync();
+                try
+                {
+                    SendCheckEmail(NewUser.Email);
+                    await _context.SaveChangesAsync();
+                    return true;
 
-            return save > 0 ? true : false;
+                } catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }   
+            return false;
 
         }
 
@@ -70,41 +80,57 @@ namespace MyBookDictionary.Infra.Services
 
             if (GetUser != null)
             {
-                var claims = new[] {
-                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, _options.Subject),
-                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                        new Claim("UserId", GetUser.Id.ToString()),
-                        new Claim("Email", user.Email),
-                        new Claim("Role", GetUser.UserType.ToString())
-                    };
-
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
-                var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                var token = new JwtSecurityToken(
-                    _options.Issuer,
-                    _options.Audience,
-                    claims,
-                    expires: DateTime.UtcNow.AddHours(10),
-                    signingCredentials: signIn);
-
-                return ("Success", new JwtSecurityTokenHandler().WriteToken(token));
+                return ("Success", WriteToken(GetUser));
             }
             else if (GetUser != null && GetUser.IsUsedMFA)
             {
-                //mfa request
+                return ("MFA", string.Format("User authenticated go to {0} and type MFA key to confirm your authentication.", GetUser.Email));
             }
             return ("Failed", "User not exist!");
         }
 
-        public Task<bool> RequestMFA()
+        public async Task RequestMFA(string email)
         {
-            throw new NotImplementedException();
+            var rnd = new Random();
+
+            var FindUser = await _context.Users.FirstOrDefaultAsync(d => d.Email == email && d.IsUsedMFA == true);
+
+            string generatedCode = null;
+
+            do
+            {
+                generatedCode = rnd.Next(99999).ToString();
+
+            } while (_context.Users.Where(c => c.MFACode == generatedCode).Count() > 1);
+
+            var from = "reply@bookDict.com";
+
+            var message = new MailMessage(from, email);
+            message.Subject = "MFA Authentication.";
+            message.Body = "Hello.\n" +
+                "Thank for your back!\n Your code is: " + generatedCode;
+
+            SmtpClient smtpClient = new SmtpClient(email);
+
+            smtpClient.UseDefaultCredentials = true;
+
+            try
+            {
+                smtpClient.Send(message);
+                FindUser.MFACode = generatedCode;
+                _context.Users.Attach(FindUser);
+                await _context.SaveChangesAsync();
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public void SendCheckEmail(string email)
         {
-            var from = "confirmation@bookdict.com";
+            var from = "reply@bookDict.com";
 
             var message = new MailMessage(from, email);
             message.Subject = "Confirm your Email.";
@@ -122,9 +148,44 @@ namespace MyBookDictionary.Infra.Services
 
             } catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());//implement logger
+                throw new Exception(ex.Message);
             }
 
         }
+
+        public async Task<(string, string)> ConfirmMFA(string mfa)
+        {
+            var FindUser = await _context.Users.FirstOrDefaultAsync(d => d.MFACode == mfa);
+
+            if(FindUser != null)
+            {
+                return ("Success", WriteToken(FindUser));
+            }
+            return ("Failed", "Wrong MFA!");
+        }
+
+        private string WriteToken(AccountUser user)
+        {
+            var claims = new[] {
+                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, _options.Subject),
+                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                        new Claim("UserId", user.Id.ToString()),
+                        new Claim("Email", user.Email),
+                        new Claim("Role", user.UserType.ToString())
+                    };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                _options.Issuer,
+                _options.Audience,
+                claims,
+                expires: DateTime.UtcNow.AddHours(10),
+                signingCredentials: signIn);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
     }
 }

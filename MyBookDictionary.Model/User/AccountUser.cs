@@ -17,7 +17,7 @@ namespace MyBookDictionary.Model.User
         public UserType UserType { get; set; }
         public DateTime DeleteDate { get; set; }
         public bool IsUsedMFA { get; set; }
-
+        public string MFACode { get; set; }
         public string FullDescription
         {
             get

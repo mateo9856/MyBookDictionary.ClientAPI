@@ -25,14 +25,18 @@ namespace MyBookDictionary.ClientAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Login([FromBody]LoginUser user)
-        {
+        {//TODO: Email-service works email send.
             var ValidLogin = _validatorLogin.Validate(user);
 
             if(ValidLogin.IsValid)
             {
                 var GetUser = await _identity.LoginUser(user);
 
-                //add method to check if val ismfa
+                if(GetUser.Item1 == "MFA")
+                {
+                    _identity.RequestMFA(user.Email);
+                    return Ok(new { Status = GetUser.Item1, Message = GetUser.Item2 });
+                }
 
                 return GetUser.Item1 == "Failed" ? BadRequest() :
                     GetUser.Item1 == "Success" ? Ok(new { Status = GetUser.Item1, Token = GetUser.Item2 }) : Forbid();
@@ -40,6 +44,16 @@ namespace MyBookDictionary.ClientAPI.Controllers
 
             return BadRequest(ValidLogin.Errors);
 
+        }
+
+        [HttpPost("confirmMFA/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConfirmMFA(string id)
+        {
+            var confirm = await _identity.ConfirmMFA(id);
+
+            return confirm.Item1 == "Success" ? Ok(confirm) : BadRequest(confirm);
         }
 
         [HttpPost("register")]
@@ -52,13 +66,18 @@ namespace MyBookDictionary.ClientAPI.Controllers
 
             if(ValidRegister.IsValid)
             {
-                //send confirm email
-                var UserCreate = await _identity.CreateUser(user);
-                if (UserCreate) _identity.SendCheckEmail(user.Email); //end method in service
-                
-            }
+                try
+                {
+                    await _identity.CreateUser(user);
+                    return Ok("Success! User created");
 
-            return Ok();
+                } catch(Exception ex)
+                {
+                    throw ex;
+                }
+            }
+            return BadRequest();
+
         }
 
     }
