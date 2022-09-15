@@ -15,6 +15,7 @@ namespace MyBookDictionary.Infra.Interfaces
         Task<(string, object)> LoginUser(LoginUser user);
         Task RequestMFA(string email);
         Task<(string, string)> ConfirmMFA(string mfa);
-        void SendCheckEmail(string email);
+        Task SendCheckEmail(string email);
+        Task<bool> ConfirmEmail(string email);
     }
 }

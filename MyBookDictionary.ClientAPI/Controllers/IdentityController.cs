@@ -34,7 +34,7 @@ namespace MyBookDictionary.ClientAPI.Controllers
 
                 if(GetUser.Item1 == "MFA")
                 {
-                    _identity.RequestMFA(user.Email);
+                    await _identity.RequestMFA(user.Email);
                     return Ok(new { Status = GetUser.Item1, Message = GetUser.Item2 });
                 }
 
@@ -54,6 +54,15 @@ namespace MyBookDictionary.ClientAPI.Controllers
             var confirm = await _identity.ConfirmMFA(id);
 
             return confirm.Item1 == "Success" ? Ok(confirm) : BadRequest(confirm);
+        }
+
+        [HttpGet("confirm/{email}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConfirmEmail([FromQuery]string email)
+        {
+            var Confirm = await _identity.ConfirmEmail(email);
+            return Confirm == true ? Ok("Your email is confirmed!") : BadRequest("Unexpected error!");
         }
 
         [HttpPost("register")]

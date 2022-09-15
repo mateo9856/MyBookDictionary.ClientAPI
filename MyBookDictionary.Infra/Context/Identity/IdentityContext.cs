@@ -39,6 +39,8 @@ namespace MyBookDictionary.Infra.Context.Identity
             modelBuilder.Entity<UserRole>()
                 .HasKey(c => c.RoleId);
 
+            modelBuilder.Entity<AccountUser>().Ignore(c => c.FullDescription);
+
             base.OnModelCreating(modelBuilder);
         }
     }

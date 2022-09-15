@@ -18,7 +18,7 @@ namespace MyBookDictionary.ClientAPI
 
             // Services and extensions
 
-            services.AddInfrastructureServices();
+            services.AddInfrastructureServices(builder.Configuration);
 
             services.AddApplicationDependencies();
 

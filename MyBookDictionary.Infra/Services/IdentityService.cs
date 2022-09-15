@@ -16,18 +16,24 @@ using MyBookDictionary.Infra.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mail;
+using SendGrid.Helpers.Mail;
+using SendGrid;
 
 namespace MyBookDictionary.Infra.Services
 {
     public class IdentityService : IIdentityService
     {
         private readonly IdentityContext _context;
+        private readonly ISendGridClient _sendGrid;
         private JwtOptions _options { get; }
+        private SendGridOptions _sendOptions { get; }
 
-        public IdentityService(IdentityContext context, IOptions<JwtOptions> options)
+        public IdentityService(IdentityContext context, IOptions<JwtOptions> options, IOptions<SendGridOptions> sendOptions, ISendGridClient sendGrid)
         {
             _context = context;
             _options = options.Value;
+            _sendOptions = sendOptions.Value;
+            _sendGrid = sendGrid;
         }
 
         public async Task<bool> CreateUser(CreateUser user)
@@ -103,20 +109,21 @@ namespace MyBookDictionary.Infra.Services
 
             } while (_context.Users.Where(c => c.MFACode == generatedCode).Count() > 1);
 
-            var from = "reply@bookDict.com";
+            var from = _sendOptions.FromEmail;
+            var fromName = _sendOptions.FromName;
 
-            var message = new MailMessage(from, email);
-            message.Subject = "MFA Authentication.";
-            message.Body = "Hello.\n" +
-                "Thank for your back!\n Your code is: " + generatedCode;
+            var message = new SendGridMessage()
+            {
+                From = new EmailAddress(from, fromName),
+                Subject = "Your MFA Code",
+                PlainTextContent = $"Hello!\n\nPress below number to authenticate\n{generatedCode}"
+            };
 
-            SmtpClient smtpClient = new SmtpClient(email);
-
-            smtpClient.UseDefaultCredentials = true;
+            message.AddTo(new EmailAddress(email));
 
             try
             {
-                smtpClient.Send(message);
+                await _sendGrid.SendEmailAsync(message);
                 FindUser.MFACode = generatedCode;
                 _context.Users.Attach(FindUser);
                 await _context.SaveChangesAsync();
@@ -128,23 +135,25 @@ namespace MyBookDictionary.Infra.Services
             }
         }
 
-        public void SendCheckEmail(string email)
+        public async Task SendCheckEmail(string email)
         {
-            var from = "reply@bookDict.com";
+            var from = _sendOptions.FromEmail;
+            var fromName = _sendOptions.FromName;
 
-            var message = new MailMessage(from, email);
-            message.Subject = "Confirm your Email.";
-            message.Body = "Hello.\n" +
+            var message = new SendGridMessage()
+            {
+                From = new EmailAddress(from, fromName),
+                Subject = "Confirm your Email.",
+                PlainTextContent = "Hello.\n" +
                 "Thank for a registering to Book Dictionary. Click below link to confirm register!\n" +
-                "http://localhost:9412/api/confirm/653gdgerer";
+                "http://localhost:44312/api/Identity/confirm/" + email
+            };
 
-            SmtpClient smtpClient = new SmtpClient(email);
+            message.AddTo(new EmailAddress(email));
 
-            smtpClient.UseDefaultCredentials = true;
-            
             try
             {
-                smtpClient.Send(message);
+               await _sendGrid.SendEmailAsync(message);
 
             } catch (Exception ex)
             {
@@ -187,5 +196,16 @@ namespace MyBookDictionary.Infra.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public async Task<bool> ConfirmEmail(string email)
+        {
+            var GetUserByEmail = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+            GetUserByEmail.IsConfirmed = true;
+
+            _context.Attach(GetUserByEmail);
+
+            return await _context.SaveChangesAsync() > 0 ? true : false;
+
+        }
     }
 }
