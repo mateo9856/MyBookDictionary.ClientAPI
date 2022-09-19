@@ -25,6 +25,7 @@ namespace MyBookDictionary.Infra
             services.AddDbContext<MainContext>(opt => opt.UseSqlServer("Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=BookDict;Integrated Security=True;"));
 
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddSingleton<IDictionaryService, DictionaryService>();
 
             return services;
         }

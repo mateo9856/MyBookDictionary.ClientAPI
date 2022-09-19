@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyBookDictionary.Application.Requests.Dictionary;
+using MyBookDictionary.Infra.Interfaces;
 
 namespace MyBookDictionary.ClientAPI.Controllers
 {
@@ -8,18 +9,28 @@ namespace MyBookDictionary.ClientAPI.Controllers
     [ApiController]
     public class DictionaryController : ControllerBase
     {
-        public DictionaryController()
+        private readonly IDictionaryService _dictionaryService;
+        public DictionaryController(IDictionaryService dictionaryService)
         {
-
+            _dictionaryService = dictionaryService;
         }
 
         [HttpGet("findNote/{keyphrase}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> FindNote([FromQuery]string keyphrase)
+        public async Task<IActionResult> FindNote(string keyphrase)
         {
-            //NOTE: Implement find algorithm and get by keyword
-            return Ok();
+            try
+            {
+                var result = _dictionaryService.GenerateByKeywordAsync(keyphrase);//TODO: Continue impl
+                return Ok();
+            
+            } 
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            
         }
 
         [HttpGet("findNote")]
