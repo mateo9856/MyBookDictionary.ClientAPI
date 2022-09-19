@@ -8,6 +8,9 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["MyBookDictionary.ClientAPI/MyBookDictionary.ClientAPI.csproj", "MyBookDictionary.ClientAPI/"]
+COPY ["MyBookDictionary.ClientAPI/MyBookDictionary.Application.csproj", "MyBookDictionary.ClientAPI/"]
+COPY ["MyBookDictionary.ClientAPI/MyBookDictionary.Infra.csproj", "MyBookDictionary.ClientAPI/"]
+COPY ["MyBookDictionary.ClientAPI/MyBookDictionary.Model.csproj", "MyBookDictionary.ClientAPI/"]
 RUN dotnet restore "MyBookDictionary.ClientAPI/MyBookDictionary.ClientAPI.csproj"
 COPY . .
 WORKDIR "/src/MyBookDictionary.ClientAPI"
