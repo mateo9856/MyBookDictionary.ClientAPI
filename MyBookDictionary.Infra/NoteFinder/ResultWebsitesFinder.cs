@@ -13,7 +13,7 @@ namespace MyBookDictionary.Infra.NoteFinder
     public class ResultWebsitesFinder : IDisposable
     {
         public string KeyPhrase { get; set; }
-
+        private readonly object responseLock = new object();
         public HttpClient client { get; set; }
 
         public ResultWebsitesFinder(string keyPhrase)
@@ -22,23 +22,41 @@ namespace MyBookDictionary.Infra.NoteFinder
             client = new HttpClient();
         }
 
+        private object GenerateAlgorithm(HttpResponseMessage? response)
+        {
+            if(response == null) return null;
+
+            var reader = new StreamReader(response.Content.ReadAsStream(), Encoding.UTF8).ReadToEnd();//value must be synchronizely
+
+            //TODO: HTML converter algorithm
+
+            return response.Content.ReadAsStringAsync().Result;
+        }
+
         public async Task<object> Find(string phrase)
         {
             var searchUri = new Uri(string.Format("https://www.google.com/search?q={0}", KeyPhrase));
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36");
             try
             {
-                var response = await client.GetAsync(searchUri);
+                HttpResponseMessage? response = null;
+
+                response = await client.GetAsync(searchUri);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var reader = await new StreamReader(await response.Content.ReadAsStreamAsync(), Encoding.UTF8).ReadToEndAsync();//value must be synchronizely
+                    return GenerateAlgorithm(response);
 
-                    //TODO: HTML converter algorithm
-
-                    return await response.Content.ReadAsStringAsync();
+                } else if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    Thread.Sleep(5000);
+                    response = await client.GetAsync(searchUri);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return GenerateAlgorithm(response);
+                    }
                 }
-
-
+                
                 var responseCode = (int)response.StatusCode;
 
                 try

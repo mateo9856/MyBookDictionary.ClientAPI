@@ -10,6 +10,7 @@ namespace MyBookDictionary.ClientAPI.Controllers
     public class DictionaryController : ControllerBase
     {
         private readonly IDictionaryService _dictionaryService;
+        private readonly object _lock = new object();
         public DictionaryController(IDictionaryService dictionaryService)
         {
             _dictionaryService = dictionaryService;
@@ -22,7 +23,11 @@ namespace MyBookDictionary.ClientAPI.Controllers
         {
             try
             {
-                var result = _dictionaryService.GenerateByKeywordAsync(keyphrase);//TODO: Continue impl
+                int status = 200;
+
+                var result = await _dictionaryService.GenerateByKeywordAsync(keyphrase);
+                Console.WriteLine();
+          
                 return Ok();
             
             } 

@@ -19,6 +19,8 @@ namespace MyBookDictionary.Model.Enums
         InternalServerError = 500,
         [Description("Values without content")]
         NoContent = 204,
+        [Description("Zbyt duża ilośc wywołań do serwera!")]
+        TooManyRequests = 429
 
     }
 }
