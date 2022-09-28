@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyBookDictionary.Application.Requests.Dictionary;
+using MyBookDictionary.Application.WebSearch;
 using MyBookDictionary.Infra.Interfaces;
 
 namespace MyBookDictionary.ClientAPI.Controllers
@@ -19,16 +20,23 @@ namespace MyBookDictionary.ClientAPI.Controllers
         [HttpGet("findNote/{keyphrase}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> FindNote(string keyphrase)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> FindNote(string keyphrase)
         {
             try
             {
                 int status = 200;
 
                 var result = await _dictionaryService.GenerateByKeywordAsync(keyphrase);
-                Console.WriteLine();
           
-                return Ok();
+                if(result is FindByKeywordResponse)
+                {
+                    var castResult = (FindByKeywordResponse)result;
+
+                    return castResult.Status == "Success" ? Ok(castResult) : StatusCode(500, castResult);
+                }
+
+                return StatusCode(500, "Unexpected error!");
             
             } 
             catch(Exception e)

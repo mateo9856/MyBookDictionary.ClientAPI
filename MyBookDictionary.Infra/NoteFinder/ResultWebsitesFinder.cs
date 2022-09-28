@@ -1,4 +1,5 @@
-﻿using MyBookDictionary.Model.Enums;
+﻿using MyBookDictionary.Application.WebSearch;
+using MyBookDictionary.Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,43 +34,38 @@ namespace MyBookDictionary.Infra.NoteFinder
             return response.Content.ReadAsStringAsync().Result;
         }
 
-        public async Task<object> Find(string phrase)
+        public async Task<FindByKeywordResponse> Find(string phrase)
         {
             var searchUri = new Uri(string.Format("https://www.google.com/search?q={0}", KeyPhrase));
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36");
             try
             {
-                HttpResponseMessage? response = null;
 
-                response = await client.GetAsync(searchUri);
+                Thread.Sleep(3000);
+
+                var response = await client.GetAsync(searchUri);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return GenerateAlgorithm(response);
+                    var algo = GenerateAlgorithm(response);
 
-                } else if (response.StatusCode == HttpStatusCode.TooManyRequests)
-                {
-                    Thread.Sleep(5000);
-                    response = await client.GetAsync(searchUri);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return GenerateAlgorithm(response);
-                    }
+                    return new FindByKeywordResponse { Status = "Success", Message = algo } ;
+
                 }
-                
                 var responseCode = (int)response.StatusCode;
 
                 try
                 {
                     var CodeDesc = (StatusDescriptions)responseCode;
-                    return CodeDesc.GetEnumDescription();
+
+                    return new FindByKeywordResponse { Status = "Failed", Message = CodeDesc.GetEnumDescription() };
 
                 } catch (Exception ex)
                 {
                     throw new Exception("Unexpected error!");
                 }
 
-                return null; //analyze status codes
+                return null;
 
             } catch(Exception e)
             {

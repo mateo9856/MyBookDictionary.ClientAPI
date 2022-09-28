@@ -15,8 +15,15 @@ namespace MyBookDictionary.Infra.Services
 
         public async Task<object> GenerateByKeywordAsync(string phrase)
         {
-            _websitesFinder = new ResultWebsitesFinder(phrase);
-            return await _websitesFinder.Find(phrase);
+            try
+            {
+                _websitesFinder = new ResultWebsitesFinder(phrase);
+                return await _websitesFinder.Find(phrase);
+            } catch (Exception ex)
+            {
+                throw ex;
+            }
+
         }
 
         public Task<object> GenerateByTagsAsync(FindByTags tags)
