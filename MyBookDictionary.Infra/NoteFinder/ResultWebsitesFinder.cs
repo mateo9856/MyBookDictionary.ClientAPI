@@ -31,7 +31,14 @@ namespace MyBookDictionary.Infra.NoteFinder
 
             //TODO: HTML converter algorithm
 
-            return response.Content.ReadAsStringAsync().Result;
+            var result = response.Content.ReadAsStringAsync().Result;
+
+            //find first index of body
+
+            var cutHtmlHeadTags = result.Substring(result.IndexOf("<body"));
+            var cutClosureBody = cutHtmlHeadTags.Substring(0, cutHtmlHeadTags.LastIndexOf("</body") + 7);
+
+            return cutClosureBody;
         }
 
         public async Task<FindByKeywordResponse> Find(string phrase)
