@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MyBookDictionary.Infra.NoteFinder
@@ -38,6 +39,10 @@ namespace MyBookDictionary.Infra.NoteFinder
             var cutHtmlHeadTags = result.Substring(result.IndexOf("<body"));
             var cutClosureBody = cutHtmlHeadTags.Substring(0, cutHtmlHeadTags.LastIndexOf("</body") + 7);
 
+            //add new lines after >
+
+            var addNewLinesToArr = Regex.Replace(cutClosureBody, @">", ">\n").Split('\n');
+            //TODO: get search datas and links by regex
             return cutClosureBody;
         }
 
