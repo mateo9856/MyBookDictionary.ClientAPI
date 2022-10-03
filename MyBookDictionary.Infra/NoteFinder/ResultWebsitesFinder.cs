@@ -39,10 +39,10 @@ namespace MyBookDictionary.Infra.NoteFinder
             var cutHtmlHeadTags = result.Substring(result.IndexOf("<body"));
             var cutClosureBody = cutHtmlHeadTags.Substring(0, cutHtmlHeadTags.LastIndexOf("</body") + 7);
 
-            //add new lines after >
-
             var addNewLinesToArr = Regex.Replace(cutClosureBody, @">", ">\n").Split('\n');
-            //TODO: get search datas and links by regex
+            var searchIndex = addNewLinesToArr.First(d => d.Contains("div") && d.Contains("id") && d.Contains(string.Concat('\u0022', "search", '\u0022')));
+            var takeArr = addNewLinesToArr.Skip(Array.IndexOf(addNewLinesToArr ,searchIndex));
+            //TODO: calc divs to get closure values
             return cutClosureBody;
         }
 
