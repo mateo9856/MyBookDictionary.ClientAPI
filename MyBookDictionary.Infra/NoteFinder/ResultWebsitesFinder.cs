@@ -41,8 +41,17 @@ namespace MyBookDictionary.Infra.NoteFinder
 
             var addNewLinesToArr = Regex.Replace(cutClosureBody, @">", ">\n").Split('\n');
             var searchIndex = addNewLinesToArr.First(d => d.Contains("div") && d.Contains("id") && d.Contains(string.Concat('\u0022', "search", '\u0022')));
-            var takeArr = addNewLinesToArr.Skip(Array.IndexOf(addNewLinesToArr ,searchIndex));
-            //TODO: calc divs to get closure values
+            var takeArr = addNewLinesToArr.Skip(Array.IndexOf(addNewLinesToArr ,searchIndex)).ToList();
+            var DifferentDivs = takeArr.Count(c => c.Contains("</div")) - takeArr.Count(c => c.Contains("<div"));
+
+            for(int i = 0; i < DifferentDivs; i++)
+            {
+                var lastIndex = takeArr.FindLastIndex(c => c.Contains("</div"));
+                takeArr.RemoveAt(lastIndex);
+            }
+
+            var cutToLastDiv = takeArr.Take(takeArr.FindLastIndex(c => c.Contains("/div")) + 1);
+            //TODO: FIND a hrefs and descriptions
             return cutClosureBody;
         }
 
