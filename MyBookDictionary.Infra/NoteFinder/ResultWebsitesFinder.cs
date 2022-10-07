@@ -50,8 +50,8 @@ namespace MyBookDictionary.Infra.NoteFinder
                 takeArr.RemoveAt(lastIndex);
             }
 
-            var cutToLastDiv = takeArr.Take(takeArr.FindLastIndex(c => c.Contains("/div")) + 1);
-            //TODO: FIND a hrefs and descriptions
+            var cutToLastDiv = takeArr.Take(takeArr.FindLastIndex(c => c.Contains("/div")) + 1).Where(c => c.Contains("a href"));
+            //TODO: FIND links and descriptions and join two of key value pair
             return cutClosureBody;
         }
 
