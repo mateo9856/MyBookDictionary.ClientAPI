@@ -40,7 +40,7 @@ namespace MyBookDictionary.Infra.NoteFinder
             var cutClosureBody = cutHtmlHeadTags.Substring(0, cutHtmlHeadTags.LastIndexOf("</body") + 7);
 
             var addNewLinesToArr = Regex.Replace(cutClosureBody, @">", ">\n").Split('\n');
-            var searchIndex = addNewLinesToArr.First(d => d.Contains("div") && d.Contains("id") && d.Contains(string.Concat('\u0022', "search", '\u0022')));
+            var searchIndex = addNewLinesToArr.First(d => d.Contains("div") && d.Contains("class") && d.Contains(string.Concat('\u0022', "yuRUbf", '\u0022')));
             var takeArr = addNewLinesToArr.Skip(Array.IndexOf(addNewLinesToArr ,searchIndex)).ToList();
             var DifferentDivs = takeArr.Count(c => c.Contains("</div")) - takeArr.Count(c => c.Contains("<div"));
 
@@ -50,9 +50,11 @@ namespace MyBookDictionary.Infra.NoteFinder
                 takeArr.RemoveAt(lastIndex);
             }
 
-            var cutToLastDiv = takeArr.Take(takeArr.FindLastIndex(c => c.Contains("/div")) + 1).Where(c => c.Contains("a href"));
+            var cutToLastDiv = takeArr.Take(takeArr.FindLastIndex(c => c.Contains("/div")) + 1);
+            var indexesFromDiv = cutToLastDiv.GetAllIndexOf("yuRUbf");
+            //TODO: Create something char to split elements for example: before yuRUbf add - to use .Split('-')
             //TODO: FIND links and descriptions and join two of key value pair
-            return cutClosureBody;
+            return string.Join(string.Empty, cutToLastDiv);
         }
 
         public async Task<FindByKeywordResponse> Find(string phrase)
