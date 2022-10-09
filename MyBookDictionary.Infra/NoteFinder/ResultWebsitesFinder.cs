@@ -50,10 +50,20 @@ namespace MyBookDictionary.Infra.NoteFinder
                 takeArr.RemoveAt(lastIndex);
             }
 
-            var cutToLastDiv = takeArr.Take(takeArr.FindLastIndex(c => c.Contains("/div")) + 1);
-            var indexesFromDiv = cutToLastDiv.GetAllIndexOf("yuRUbf");
-            //TODO: Create something char to split elements for example: before yuRUbf add - to use .Split('-')
-            //TODO: FIND links and descriptions and join two of key value pair
+            var cutToLastDiv = takeArr.Take(takeArr.FindLastIndex(c => c.Contains("/div")) + 1).ToList();
+            var indexesFromDiv = cutToLastDiv.GetAllIndexOf("yuRUbf").ToList();
+
+            var divArrs = new List<string[]>();
+
+            int divIndex = 0;
+            foreach(var item in indexesFromDiv.Skip(1))
+            {
+                divArrs.Add(cutToLastDiv.Take(item - divIndex).ToArray());
+                divIndex = item;
+            }
+      
+            //TODO: Select items which contain link and description
+
             return string.Join(string.Empty, cutToLastDiv);
         }
 
