@@ -61,9 +61,12 @@ namespace MyBookDictionary.Infra.NoteFinder
                 divArrs.Add(cutToLastDiv.Take(item - divIndex).ToArray());
                 divIndex = item;
             }
-      
-            //TODO: Select items which contain link and description
 
+            var Results = divArrs.Select(c => new LinkDscriptor()
+            {
+                Link = c.FirstOrDefault(d => d.StartsWith("<a href")),
+                Descriptor = string.Join(string.Empty, c.Where(d => d.Contains("h3")))
+            });//TODO: Exclude tags and parameters
             return string.Join(string.Empty, cutToLastDiv);
         }
 
