@@ -24,17 +24,14 @@ namespace MyBookDictionary.Infra.NoteFinder
             client = new HttpClient();
         }
 
-        private object GenerateAlgorithm(HttpResponseMessage? response)
+        private IEnumerable<LinkDscriptor> GenerateAlgorithm(HttpResponseMessage? response)
         {
             if(response == null) return null;
 
             var reader = new StreamReader(response.Content.ReadAsStream(), Encoding.UTF8).ReadToEnd();//value must be synchronizely
 
-            //TODO: HTML converter algorithm
-
             var result = response.Content.ReadAsStringAsync().Result;
 
-            //find first index of body
 
             var cutHtmlHeadTags = result.Substring(result.IndexOf("<body"));
             var cutClosureBody = cutHtmlHeadTags.Substring(0, cutHtmlHeadTags.LastIndexOf("</body") + 7);
@@ -59,15 +56,16 @@ namespace MyBookDictionary.Infra.NoteFinder
             foreach(var item in indexesFromDiv.Skip(1))
             {
                 divArrs.Add(cutToLastDiv.Take(item - divIndex).ToArray());
+                cutToLastDiv.RemoveRange(0, item - divIndex);
                 divIndex = item;
             }
 
             var Results = divArrs.Select(c => new LinkDscriptor()
             {
-                Link = c.FirstOrDefault(d => d.StartsWith("<a href")),
-                Descriptor = string.Join(string.Empty, c.Where(d => d.Contains("h3")))
-            });//TODO: Exclude tags and parameters
-            return string.Join(string.Empty, cutToLastDiv);
+                Link = Regex.Match(c.FirstOrDefault(d => d.StartsWith("<a href")), @"(https?:[^""]*)").Value,
+                Descriptor = Regex.Replace(string.Join(string.Empty, c.Where(d => d.Contains("h3")).Take(2)), @"<[^>]*>", string.Empty)
+            });
+            return Results;
         }
 
         public async Task<FindByKeywordResponse> Find(string phrase)
