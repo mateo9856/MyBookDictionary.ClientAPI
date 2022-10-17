@@ -18,7 +18,7 @@ namespace MyBookDictionary.Infra.Services
             try
             {
                 _websitesFinder = new ResultWebsitesFinder(phrase);
-                return await _websitesFinder.Find(phrase);
+                return await _websitesFinder.Find(phrase, Helpers.SearchType.GoogleSearch);
             } catch (Exception ex)
             {
                 throw ex;
@@ -36,5 +36,19 @@ namespace MyBookDictionary.Infra.Services
             _websitesFinder.Dispose();
         }
 
+        public async Task<IEnumerable<string>> GenerateNote(string address)
+        {
+            try
+            {
+                _websitesFinder = new ResultWebsitesFinder(address);
+//TODO:Implement
+                var finder = await _websitesFinder.Find(address, Helpers.SearchType.GenerateNote);
+                return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

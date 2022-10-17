@@ -21,11 +21,10 @@ namespace MyBookDictionary.ClientAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> FindNote(string keyphrase)
+        public async Task<ActionResult> FindNotesFromGoogle(string keyphrase)
         {
             try
             {
-                int status = 200;
 
                 var result = await _dictionaryService.GenerateByKeywordAsync(keyphrase);
           
@@ -45,6 +44,16 @@ namespace MyBookDictionary.ClientAPI.Controllers
             }
             
         }
+
+        [HttpGet("generateFromAddress")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> GenerateFromAddress([FromBody]GenerateFromAddress address)
+        {
+            return Ok();
+        }
+
 
         [HttpGet("findNote")]
         [ProducesResponseType(StatusCodes.Status200OK)]

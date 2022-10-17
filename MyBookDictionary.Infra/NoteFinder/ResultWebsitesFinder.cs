@@ -1,4 +1,5 @@
 ﻿using MyBookDictionary.Application.WebSearch;
+using MyBookDictionary.Infra.Helpers;
 using MyBookDictionary.Model.Enums;
 using System;
 using System.Collections.Generic;
@@ -24,14 +25,20 @@ namespace MyBookDictionary.Infra.NoteFinder
             client = new HttpClient();
         }
 
-        private IEnumerable<LinkDscriptor> GenerateAlgorithm(HttpResponseMessage? response)
+        public string ResponseWebsite(HttpResponseMessage? response) 
         {
-            if(response == null) return null;
+            if (response == null) return null;
 
-            var reader = new StreamReader(response.Content.ReadAsStream(), Encoding.UTF8).ReadToEnd();//value must be synchronizely
+            var reader = new StreamReader(response.Content.ReadAsStream(), Encoding.UTF8).ReadToEnd();
 
             var result = response.Content.ReadAsStringAsync().Result;
 
+            return result;
+        }
+
+        private IEnumerable<LinkDscriptor> GenerateAlgorithm(HttpResponseMessage? response)
+        {
+            var result = ResponseWebsite(response);
 
             var cutHtmlHeadTags = result.Substring(result.IndexOf("<body"));
             var cutClosureBody = cutHtmlHeadTags.Substring(0, cutHtmlHeadTags.LastIndexOf("</body") + 7);
@@ -68,10 +75,34 @@ namespace MyBookDictionary.Infra.NoteFinder
             return Results;
         }
 
-        public async Task<FindByKeywordResponse> Find(string phrase)
+        private IEnumerable<string> GenerateNotes(HttpResponseMessage? response) 
         {
-            var searchUri = new Uri(string.Format("https://www.google.com/search?q={0}", KeyPhrase));
-            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36");
+            var result = ResponseWebsite(response);
+            //TODO: Implement algo
+            return new List<string>();
+        }
+
+        public async Task<object> Find(string phrase, SearchType type)
+        {
+            Uri? searchUri = null;
+
+            switch(type)
+            {
+                case SearchType.GoogleSearch:
+                    searchUri = new Uri(string.Format("https://www.google.com/search?q={0}", KeyPhrase));
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36");
+                    break;
+                case SearchType.GenerateNote:
+                    searchUri = new Uri(phrase);
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36");
+                    break;
+                case SearchType.GoogleTags:
+                    //TODO: Tags logic
+                    return null;
+                    break;
+                default:
+                    return null;
+            }
             try
             {
 
@@ -79,13 +110,18 @@ namespace MyBookDictionary.Infra.NoteFinder
 
                 var response = await client.GetAsync(searchUri);
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode && type == SearchType.GoogleSearch)
                 {
                     var algo = GenerateAlgorithm(response);
 
                     return new FindByKeywordResponse { Status = "Success", Message = algo } ;
 
                 }
+                else if(response.IsSuccessStatusCode && type == SearchType.GenerateNote)
+                {
+                    var algo = GenerateNotes(response);
+                }
+
                 var responseCode = (int)response.StatusCode;
 
                 try

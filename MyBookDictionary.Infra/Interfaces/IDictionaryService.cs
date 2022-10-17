@@ -1,4 +1,5 @@
 ﻿using MyBookDictionary.Application.Requests.Dictionary;
+using MyBookDictionary.Infra.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace MyBookDictionary.Infra.Interfaces
     {
         Task<object> GenerateByKeywordAsync(string phrase);
         Task<object> GenerateByTagsAsync(FindByTags tags);
+        Task<IEnumerable<string>> GenerateNote(string address);
     }
 }
