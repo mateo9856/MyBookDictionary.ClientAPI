@@ -45,13 +45,22 @@ namespace MyBookDictionary.ClientAPI.Controllers
             
         }
 
-        [HttpGet("generateFromAddress")]
+        [HttpPost("generateFromAddress")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> GenerateFromAddress([FromBody]GenerateFromAddress address)
         {
-            return Ok();
+            try
+            {
+                var generate = await _dictionaryService.GenerateNote(address.Uri);
+
+                return Ok(generate);
+            }
+            catch (Exception e) 
+            {
+                return BadRequest(e.Message);
+            }
         }
 
 

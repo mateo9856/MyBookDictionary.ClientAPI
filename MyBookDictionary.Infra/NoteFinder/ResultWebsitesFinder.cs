@@ -25,7 +25,7 @@ namespace MyBookDictionary.Infra.NoteFinder
             client = new HttpClient();
         }
 
-        public string ResponseWebsite(HttpResponseMessage? response) 
+        public string[] ResponseWebsite(HttpResponseMessage? response) 
         {
             if (response == null) return null;
 
@@ -33,19 +33,18 @@ namespace MyBookDictionary.Infra.NoteFinder
 
             var result = response.Content.ReadAsStringAsync().Result;
 
-            return result;
+            var cutHtmlHeadTags = result.Substring(result.IndexOf("<body"));
+            var cutClosureBody = cutHtmlHeadTags.Substring(0, cutHtmlHeadTags.LastIndexOf("</body") + 7);
+            var addNewLinesToArr = Regex.Replace(cutClosureBody, @">", ">\n").Split('\n');
+            return addNewLinesToArr;
         }
 
         private IEnumerable<LinkDscriptor> GenerateAlgorithm(HttpResponseMessage? response)
         {
             var result = ResponseWebsite(response);
 
-            var cutHtmlHeadTags = result.Substring(result.IndexOf("<body"));
-            var cutClosureBody = cutHtmlHeadTags.Substring(0, cutHtmlHeadTags.LastIndexOf("</body") + 7);
-
-            var addNewLinesToArr = Regex.Replace(cutClosureBody, @">", ">\n").Split('\n');
-            var searchIndex = addNewLinesToArr.First(d => d.Contains("div") && d.Contains("class") && d.Contains(string.Concat('\u0022', "yuRUbf", '\u0022')));
-            var takeArr = addNewLinesToArr.Skip(Array.IndexOf(addNewLinesToArr ,searchIndex)).ToList();
+            var searchIndex = result.First(d => d.Contains("div") && d.Contains("class") && d.Contains(string.Concat('\u0022', "yuRUbf", '\u0022')));
+            var takeArr = result.Skip(Array.IndexOf(result ,searchIndex)).ToList();
             var DifferentDivs = takeArr.Count(c => c.Contains("</div")) - takeArr.Count(c => c.Contains("<div"));
 
             for(int i = 0; i < DifferentDivs; i++)
@@ -78,8 +77,7 @@ namespace MyBookDictionary.Infra.NoteFinder
         private IEnumerable<string> GenerateNotes(HttpResponseMessage? response) 
         {
             var result = ResponseWebsite(response);
-            //TODO: Implement algo
-            return new List<string>();
+            return result;
         }
 
         public async Task<object> Find(string phrase, SearchType type)
