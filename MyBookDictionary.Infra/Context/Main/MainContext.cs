@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using MyBookDictionary.Infra.Context.Identity;
 using MyBookDictionary.Model.Common.Base;
+using MyBookDictionary.Model.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,16 +14,11 @@ namespace MyBookDictionary.Infra.Context.Main
 {
     public class MainContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-        public MainContext(IConfiguration configuration)
+        public MainContext(DbContextOptions<MainContext> options) : base(options)
         {
-            _configuration = configuration;
         }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(_configuration.GetConnectionString("BookClient"));
-            base.OnConfiguring(optionsBuilder);
-        }
+
+        public DbSet<ContentClasses> ContentClasses { get; set; } 
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         {

@@ -1,4 +1,5 @@
 ﻿using MyBookDictionary.Application.Requests.Dictionary;
+using MyBookDictionary.Infra.Common;
 using MyBookDictionary.Infra.Interfaces;
 using MyBookDictionary.Infra.NoteFinder;
 using System;
@@ -12,6 +13,12 @@ namespace MyBookDictionary.Infra.Services
     public class DictionaryService : IDictionaryService
     {
         private ResultWebsitesFinder _websitesFinder;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public DictionaryService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
 
         public async Task<object> GenerateByKeywordAsync(string phrase)
         {
@@ -41,8 +48,8 @@ namespace MyBookDictionary.Infra.Services
             try
             {
                 _websitesFinder = new ResultWebsitesFinder(address);
-//TODO:Implement
-                var finder = await _websitesFinder.Find(address, Helpers.SearchType.GenerateNote);
+//TODO:Implement and add something method to GetFromParam
+                var finder = await _websitesFinder.Find(address, Helpers.SearchType.GenerateNote, await _unitOfWork.contextClassService.GetFromParam("content", ""));
                 return new List<string>();
             }
             catch (Exception ex)

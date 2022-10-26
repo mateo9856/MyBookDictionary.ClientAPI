@@ -77,10 +77,11 @@ namespace MyBookDictionary.Infra.NoteFinder
         private IEnumerable<string> GenerateNotes(HttpResponseMessage? response) 
         {
             var result = ResponseWebsite(response);
+            //TODO: Find from ContentClass elements
             return result;
         }
 
-        public async Task<object> Find(string phrase, SearchType type)
+        public async Task<object> Find(string phrase, SearchType type, string[] elements = null)
         {
             Uri? searchUri = null;
 

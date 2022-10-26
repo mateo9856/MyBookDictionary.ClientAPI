@@ -1,5 +1,6 @@
 ﻿using MyBookDictionary.Infra.Context.Identity;
 using MyBookDictionary.Infra.Context.Main;
+using MyBookDictionary.Infra.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,16 @@ namespace MyBookDictionary.Infra.Common
     {
         private readonly MainContext _mainContext;
         private readonly IdentityContext _identityContext;
+        public IContextClassService contextClassService { get; }
 
-        public UnitOfWork(MainContext mainContext, IdentityContext identityContext)
+        public UnitOfWork(MainContext mainContext, IdentityContext identityContext, IContextClassService contextClassService)
         {
             _mainContext = mainContext;
             _identityContext = identityContext;
+            this.contextClassService = contextClassService;
         }
         private bool disposed = false;
+
         public void Dispose()
         {
             if(!disposed)
