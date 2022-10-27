@@ -49,7 +49,8 @@ namespace MyBookDictionary.Infra.Services
             {
                 _websitesFinder = new ResultWebsitesFinder(address);
 //TODO:Implement and add something method to GetFromParam
-                var finder = await _websitesFinder.Find(address, Helpers.SearchType.GenerateNote, await _unitOfWork.contextClassService.GetFromParam("content", ""));
+                var finder = await _websitesFinder.Find(address, Helpers.SearchType.GenerateNote, await _unitOfWork.contextClassService
+                    .GetFromParam(await _unitOfWork.contextClassService.AllParams()));
                 return new List<string>();
             }
             catch (Exception ex)

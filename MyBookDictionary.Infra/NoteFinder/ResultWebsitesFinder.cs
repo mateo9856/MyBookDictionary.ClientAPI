@@ -74,9 +74,10 @@ namespace MyBookDictionary.Infra.NoteFinder
             return Results;
         }
 
-        private IEnumerable<string> GenerateNotes(HttpResponseMessage? response) 
+        private IEnumerable<string> GenerateNotes(HttpResponseMessage? response, string[] elements) 
         {
             var result = ResponseWebsite(response);
+            var resultClasses = result.Where(d => elements.Any(e => d.Contains(e)));
             //TODO: Find from ContentClass elements
             return result;
         }
@@ -118,7 +119,7 @@ namespace MyBookDictionary.Infra.NoteFinder
                 }
                 else if(response.IsSuccessStatusCode && type == SearchType.GenerateNote)
                 {
-                    var algo = GenerateNotes(response);
+                    var algo = GenerateNotes(response, elements);
                 }
 
                 var responseCode = (int)response.StatusCode;

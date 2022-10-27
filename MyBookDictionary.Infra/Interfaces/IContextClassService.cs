@@ -11,5 +11,6 @@ namespace MyBookDictionary.Infra.Interfaces
     public interface IContextClassService
     {
         Task<string[]> GetFromParam(params string[] contents);
+        Task<string[]> AllParams();
     }
 }
