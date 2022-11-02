@@ -11,6 +11,11 @@ namespace MyBookDictionary.Infra.Context.Identity
 {
     public class IdentityContext : DbContext
     {
+        public IdentityContext()
+        {
+            
+        }
+
         public IdentityContext(DbContextOptions<IdentityContext> options) : base(options)
         {
         }
@@ -18,6 +23,12 @@ namespace MyBookDictionary.Infra.Context.Identity
         public DbSet<AccountUser> Users { get; set; }
 
         public DbSet<UserRole> UsersRoles { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer("Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=BookDict;Integrated Security=True;");
+            base.OnConfiguring(optionsBuilder);
+        }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

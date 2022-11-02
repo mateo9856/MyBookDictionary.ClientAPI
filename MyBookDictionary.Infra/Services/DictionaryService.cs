@@ -48,9 +48,12 @@ namespace MyBookDictionary.Infra.Services
             try
             {
                 _websitesFinder = new ResultWebsitesFinder(address);
-//TODO:Implement and add something method to GetFromParam
+                //TODO:Implement and add something method to GetFromParam
+
+                var ClassesParams = await _unitOfWork.contextClassService.AllParams();
+
                 var finder = await _websitesFinder.Find(address, Helpers.SearchType.GenerateNote, await _unitOfWork.contextClassService
-                    .GetFromParam(await _unitOfWork.contextClassService.AllParams()));
+                    .GetFromParam(ClassesParams));
                 return new List<string>();
             }
             catch (Exception ex)

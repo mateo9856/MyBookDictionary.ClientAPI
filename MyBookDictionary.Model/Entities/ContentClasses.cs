@@ -10,5 +10,6 @@ namespace MyBookDictionary.Model.Entities
     public class ContentClasses : BaseEntity
     {
         public string ContentClassName { get;set; }
+        public bool IsTag { get; set; }
     }
 }

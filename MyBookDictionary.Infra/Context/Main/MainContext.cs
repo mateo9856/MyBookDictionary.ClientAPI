@@ -14,11 +14,23 @@ namespace MyBookDictionary.Infra.Context.Main
 {
     public class MainContext : DbContext
     {
+
+        public MainContext()
+        {
+
+        }
+
         public MainContext(DbContextOptions<MainContext> options) : base(options)
         {
         }
 
-        public DbSet<ContentClasses> ContentClasses { get; set; } 
+        public DbSet<ContentClasses> ContentClasses { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer("Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=BookDict;Integrated Security=True;");
+            base.OnConfiguring(optionsBuilder);
+        }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         {

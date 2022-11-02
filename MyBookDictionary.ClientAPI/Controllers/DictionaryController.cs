@@ -50,7 +50,7 @@ namespace MyBookDictionary.ClientAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> GenerateFromAddress([FromBody]GenerateFromAddress address)
-        {
+        {//TODO: extend ContextClass table to tag values save as bool val IsTag
             try
             {
                 var generate = await _dictionaryService.GenerateNote(address.Uri);

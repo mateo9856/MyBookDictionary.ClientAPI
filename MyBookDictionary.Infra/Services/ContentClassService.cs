@@ -27,7 +27,7 @@ namespace MyBookDictionary.Infra.Services
         public async Task<string[]> GetFromParam(params string[] contents)
         {
             return await mainContext.ContentClasses
-                .Where(c => contents.Any(d => d.Contains(c.ContentClassName)))
+                .Where(c => contents.Contains(c.ContentClassName))
                 .Select(x => x.ContentClassName).ToArrayAsync();
         }
 
