@@ -10,7 +10,7 @@ namespace MyBookDictionary.Infra.Interfaces
 {
     public interface IContextClassService
     {
-        Task<string[]> GetFromParam(params string[] contents);
-        Task<string[]> AllParams();
+        Task<ContentClasses[]> GetFromParam(params string[] contents);
+        Task<ContentClasses[]> AllParams();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using MyBookDictionary.Application.WebSearch;
 using MyBookDictionary.Infra.Helpers;
+using MyBookDictionary.Model.Entities;
 using MyBookDictionary.Model.Enums;
 using System;
 using System.Collections.Generic;
@@ -74,15 +75,34 @@ namespace MyBookDictionary.Infra.NoteFinder
             return Results;
         }
 
-        private IEnumerable<string> GenerateNotes(HttpResponseMessage? response, string[] elements) 
+        private IEnumerable<string> GenerateNotes(HttpResponseMessage? response, ContentClasses[] elements) 
         {
+            List<string> Result = new List<string>();
             var result = ResponseWebsite(response);
-            var resultClasses = result.Where(d => elements.Any(e => d.Contains(e)));
+            var contents = result.Where(d => elements.Any(c => d.Contains(c.ContentClassName)));
+
+            foreach (var content in contents) 
+            {
+                //check if it's start tag or value contains in class
+                var elementTag = elements.FirstOrDefault(d => content.Contains(d.ContentClassName));
+                if(elementTag != null && elementTag.IsTag)
+                {
+                    //logic for tag
+                } 
+                else if(elementTag != null && !elementTag.IsTag)
+                {
+                    //logic for class
+                }
+
+                var IndexFromResult = Array.IndexOf(result, content);
+
+            }
+
             //TODO: Find from ContentClass elements
-            return result;
+            return null;
         }
 
-        public async Task<object> Find(string phrase, SearchType type, string[] elements = null)
+        public async Task<object> Find(string phrase, SearchType type, ContentClasses[] elements = null)
         {
             Uri? searchUri = null;
 

@@ -19,16 +19,16 @@ namespace MyBookDictionary.Infra.Services
             mainContext = context;
         }
 
-        public async Task<string[]> AllParams()
+        public async Task<ContentClasses[]> AllParams()
         {
-            return await mainContext.ContentClasses.Select(c => c.ContentClassName).ToArrayAsync();
+            return await mainContext.ContentClasses.ToArrayAsync();
         }
 
-        public async Task<string[]> GetFromParam(params string[] contents)
+        public async Task<ContentClasses[]> GetFromParam(params string[] contents)
         {
             return await mainContext.ContentClasses
                 .Where(c => contents.Contains(c.ContentClassName))
-                .Select(x => x.ContentClassName).ToArrayAsync();
+                .ToArrayAsync();
         }
 
     }

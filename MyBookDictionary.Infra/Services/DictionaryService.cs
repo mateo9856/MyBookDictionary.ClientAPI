@@ -52,8 +52,7 @@ namespace MyBookDictionary.Infra.Services
 
                 var ClassesParams = await _unitOfWork.contextClassService.AllParams();
 
-                var finder = await _websitesFinder.Find(address, Helpers.SearchType.GenerateNote, await _unitOfWork.contextClassService
-                    .GetFromParam(ClassesParams));
+                var finder = await _websitesFinder.Find(address, Helpers.SearchType.GenerateNote, ClassesParams);
                 return new List<string>();
             }
             catch (Exception ex)
