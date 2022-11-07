@@ -89,13 +89,17 @@ namespace MyBookDictionary.Infra.NoteFinder
                 if(elementTag != null && elementTag.IsTag)
                 {
                     //logic for tag
-                    var StartIndex = Array.IndexOf(result, result.First(d => d.Contains($"<{elementTag.ContentClassName}")));
+                    var Indexes = result.GetAllIndexOf($"<{elementTag.ContentClassName}");
                     //calculate to get Closure
+                    var findEnd = Array.LastIndexOf(result, result.LastOrDefault(d => d.Contains($"<\u0022{elementTag.ContentClassName}")));
+                
                 } 
                 else if(elementTag != null && !elementTag.IsTag)
                 {
                     //logic for class
                     var StartIndex = Array.IndexOf(result, result.First(d => Regex.IsMatch(d, @"class=\u0022.*\u0022") && !d.Contains("<body")));
+                    var GetTag = result[StartIndex].FindHtmlTag();
+                    //var EndIndex = Array.LastIndexOf(result, result.LastOrDefault(e => !e.Contains("<\u0022body") && ));
                     //calculate to get Closure
                       
                 }
