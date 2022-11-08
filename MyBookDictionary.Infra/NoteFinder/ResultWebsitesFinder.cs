@@ -88,20 +88,18 @@ namespace MyBookDictionary.Infra.NoteFinder
 
                 if(elementTag != null && elementTag.IsTag)
                 {
-                    //logic for tag
-                    var Indexes = result.GetAllIndexOf($"<{elementTag.ContentClassName}");
-                    //calculate to get Closure
-                    var findEnd = Array.LastIndexOf(result, result.LastOrDefault(d => d.Contains($"<\u0022{elementTag.ContentClassName}")));
+                    var StartIndex = Array.IndexOf(result, result.FirstOrDefault(d => d.Contains($"<{elementTag.ContentClassName}")));
+                    var FinderIndex = result.Skip(StartIndex).FindIndexHTMLClosureIndex(elementTag.ContentClassName);
+
+                    //after find index delete and exclude datas From him and cut from result array and delete
                 
                 } 
                 else if(elementTag != null && !elementTag.IsTag)
                 {
-                    //logic for class
                     var StartIndex = Array.IndexOf(result, result.First(d => Regex.IsMatch(d, @"class=\u0022.*\u0022") && !d.Contains("<body")));
                     var GetTag = result[StartIndex].FindHtmlTag();
-                    //var EndIndex = Array.LastIndexOf(result, result.LastOrDefault(e => !e.Contains("<\u0022body") && ));
-                    //calculate to get Closure
-                      
+                    var FinderIndex = result.Skip(StartIndex).FindIndexHTMLClosureIndex(GetTag);
+                    //TODO: the same as above
                 }
 
                 var IndexFromResult = Array.IndexOf(result, content);
