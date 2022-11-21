@@ -77,10 +77,11 @@ namespace MyBookDictionary.Infra.NoteFinder
 
         private IEnumerable<string> GenerateNotes(HttpResponseMessage? response, ContentClasses[] elements) 
         {
-            List<string> Result = new List<string>();
+            List<IEnumerable<string>> Result = new List<IEnumerable<string>>();
             var result = ResponseWebsite(response);
             var contents = result.Where(d => elements.Any(c => d.Contains(c.ContentClassName)));
 
+            //TODO: Return zeros
             foreach (var content in contents) 
             {
                 //check if it's start tag or value contains in class
@@ -88,18 +89,27 @@ namespace MyBookDictionary.Infra.NoteFinder
 
                 if(elementTag != null && elementTag.IsTag)
                 {
-                    var StartIndex = Array.IndexOf(result, result.FirstOrDefault(d => d.Contains($"<{elementTag.ContentClassName}")));
-                    var FinderIndex = result.Skip(StartIndex).FindIndexHTMLClosureIndex(elementTag.ContentClassName);
+                    var IndexOfs = result.GetAllIndexOf(result.FirstOrDefault(d => d.Contains($"<{elementTag.ContentClassName}")));
 
-                    //after find index delete and exclude datas From him and cut from result array and delete
+                    foreach(var index in IndexOfs)
+                    {
+                        var FindexIndex = result.Skip(index).FindIndexHTMLClosureIndex(elementTag.ContentClassName);
+                        var resultArr = result.Skip(index).Take(FindexIndex - index);
+                        Result.Add(resultArr);
+                    }
                 
                 } 
                 else if(elementTag != null && !elementTag.IsTag)
                 {
-                    var StartIndex = Array.IndexOf(result, result.First(d => Regex.IsMatch(d, @"class=\u0022.*\u0022") && !d.Contains("<body")));
-                    var GetTag = result[StartIndex].FindHtmlTag();
-                    var FinderIndex = result.Skip(StartIndex).FindIndexHTMLClosureIndex(GetTag);
-                    //TODO: the same as above
+                    var IndexOfs = result.GetAllIndexOf(result.First(d => Regex.IsMatch(d, @"class=\u0022.*\u0022") && !d.Contains("<body")));
+
+                    foreach(var index in IndexOfs) {
+                        var GetTag = result[index].FindHtmlTag();
+                        var FinderIndex = result.Skip(index).FindIndexHTMLClosureIndex(GetTag);
+                        var resultArr = result.Skip(index).Take(FinderIndex - index);
+                        Result.Add(resultArr);
+                    }
+
                 }
 
                 var IndexFromResult = Array.IndexOf(result, content);
