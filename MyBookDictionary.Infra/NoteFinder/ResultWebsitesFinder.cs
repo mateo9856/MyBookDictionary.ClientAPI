@@ -94,7 +94,7 @@ namespace MyBookDictionary.Infra.NoteFinder
                     foreach(var index in IndexOfs)
                     {
                         var FindexIndex = result.Skip(index).FindIndexHTMLClosureIndex(elementTag.ContentClassName);
-                        var resultArr = result.Skip(index).Take(FindexIndex - index);
+                        var resultArr = result.Skip(index).Take(FindexIndex + 1);
                         Result.Add(resultArr);
                     }
                 
@@ -106,7 +106,7 @@ namespace MyBookDictionary.Infra.NoteFinder
                     foreach(var index in IndexOfs) {
                         var GetTag = result[index].FindHtmlTag();
                         var FinderIndex = result.Skip(index).FindIndexHTMLClosureIndex(GetTag);
-                        var resultArr = result.Skip(index).Take(FinderIndex - index);
+                        var resultArr = result.Skip(index).Take(FinderIndex + 1);
                         Result.Add(resultArr);
                     }
 
@@ -116,7 +116,12 @@ namespace MyBookDictionary.Infra.NoteFinder
 
             }
 
-            //TODO: Find from ContentClass elements
+            //TODO: Exclude text from Results
+            foreach(var item in Result)
+            {
+
+            }
+
             return null;
         }
 
